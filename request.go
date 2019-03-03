@@ -34,8 +34,8 @@ type RequestPayload struct {
 }
 
 type RequestNLU struct {
-	Tokens   []string      `json:"tokens"`
-	Entities []interface{} `json:"entities"` // TODO
+	Tokens   []string  `json:"tokens"`
+	Entities []*Entity `json:"entities"`
 }
 
 type RequestSession struct {
