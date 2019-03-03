@@ -15,14 +15,16 @@ type Printf func(format string, a ...interface{})
 type Responder func(ctx context.Context, request *Request, response *Response) error
 
 type Handler struct {
-	r      Responder
-	Errorf Printf
-	Debugf Printf
+	r       Responder
+	Timeout time.Duration
+	Errorf  Printf
+	Debugf  Printf
 }
 
 func NewHandler(r Responder) *Handler {
 	return &Handler{
-		r: r,
+		r:       r,
+		Timeout: 3 * time.Second,
 	}
 }
 
@@ -45,6 +47,9 @@ func pingResponder(ctx context.Context, request *Request, response *Response) er
 }
 
 func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	ctx, cancel := context.WithTimeout(req.Context(), h.Timeout)
+	defer cancel()
+
 	if h.Debugf != nil {
 		b, err := httputil.DumpRequest(req, true)
 		if err != nil {
@@ -71,8 +76,6 @@ func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		r = pingResponder
 	}
 
-	ctx, cancel := context.WithTimeout(req.Context(), 5*time.Second)
-	defer cancel()
 	response := NewResponse(request)
 	if err := r(ctx, request, response); err != nil {
 		h.errorf("Responder failed: %s.", err)
