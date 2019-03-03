@@ -1,5 +1,5 @@
-#!/bin/sh -l
+#!/bin/sh
 
 set -eux
 
-/usr/local/go/bin/go test -v
+go test -v
