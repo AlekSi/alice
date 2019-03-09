@@ -28,19 +28,11 @@ type ResponsePayload struct {
 type ResponseCard struct {
 	Type ResponseCardType `json:"type"`
 
-	// single image
+	// For BigImage type.
+	*ResponseCardItem `json:",omitempty"`
 
-	ResponseCardItem
-
-	// multiple images
-
-	Header *ResponseCardHeader `json:"header,omitempty"`
-	Items  []ResponseCardItem  `json:"items,omitempty"`
-	Footer *ResponseCardFooter `json:"footer,omitempty"`
-}
-
-type ResponseCardHeader struct {
-	Text string `json:"text"`
+	// For ItemsList type.
+	*ResponseCardItemsList `json:",omitempty"`
 }
 
 type ResponseCardItem struct {
@@ -48,6 +40,16 @@ type ResponseCardItem struct {
 	Title       string              `json:"title,omitempty"`
 	Description string              `json:"description,omitempty"`
 	Button      *ResponseCardButton `json:"button,omitempty"`
+}
+
+type ResponseCardItemsList struct {
+	Header *ResponseCardHeader `json:"header,omitempty"`
+	Items  []ResponseCardItem  `json:"items,omitempty"`
+	Footer *ResponseCardFooter `json:"footer,omitempty"`
+}
+
+type ResponseCardHeader struct {
+	Text string `json:"text"`
 }
 
 type ResponseCardFooter struct {

@@ -119,7 +119,7 @@ func TestResponse(t *testing.T) {
 					Tts:  "Здравствуйте! Это мы, хоров+одо в+еды.",
 					Card: &ResponseCard{
 						Type: BigImage,
-						ResponseCardItem: ResponseCardItem{
+						ResponseCardItem: &ResponseCardItem{
 							ImageID:     "1027858/46r960da47f60207e924",
 							Title:       "Заголовок для изображения",
 							Description: "Описание изображения.",
@@ -216,27 +216,29 @@ func TestResponse(t *testing.T) {
 					Tts:  "Здравствуйте! Это мы, хоров+одо в+еды.",
 					Card: &ResponseCard{
 						Type: ItemsList,
-						Header: &ResponseCardHeader{
-							Text: "Заголовок галереи изображений",
-						},
-						Items: []ResponseCardItem{
-							{
-								ImageID:     "image_id",
-								Title:       "Заголовок для изображения.",
-								Description: "Описание изображения.",
-								Button: &ResponseCardButton{
-									Text:    "Надпись на кнопке",
-									URL:     "http://example.com/",
-									Payload: map[string]interface{}{},
+						ResponseCardItemsList: &ResponseCardItemsList{
+							Header: &ResponseCardHeader{
+								Text: "Заголовок галереи изображений",
+							},
+							Items: []ResponseCardItem{
+								{
+									ImageID:     "image_id",
+									Title:       "Заголовок для изображения.",
+									Description: "Описание изображения.",
+									Button: &ResponseCardButton{
+										Text:    "Надпись на кнопке",
+										URL:     "http://example.com/",
+										Payload: map[string]interface{}{},
+									},
 								},
 							},
-						},
-						Footer: &ResponseCardFooter{
-							Text: "Текст блока под изображением.",
-							Button: &ResponseCardButton{
-								Text:    "Надпись на кнопке",
-								URL:     "https://example.com/",
-								Payload: map[string]interface{}{},
+							Footer: &ResponseCardFooter{
+								Text: "Текст блока под изображением.",
+								Button: &ResponseCardButton{
+									Text:    "Надпись на кнопке",
+									URL:     "https://example.com/",
+									Payload: map[string]interface{}{},
+								},
 							},
 						},
 					},

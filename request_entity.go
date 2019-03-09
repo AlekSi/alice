@@ -73,15 +73,16 @@ func (e *Entity) YandexGeo() *YandexGeo {
 }
 
 type YandexDateTime struct {
-	Year             int
+	Year   int
+	Month  int
+	Day    int
+	Hour   int
+	Minute int
+
 	YearIsRelative   bool
-	Month            int
 	MonthIsRelative  bool
-	Day              int
 	DayIsRelative    bool
-	Hour             int
 	HourIsRelative   bool
-	Minute           int
 	MinuteIsRelative bool
 }
 
@@ -115,15 +116,16 @@ func (e *Entity) YandexDateTime() *YandexDateTime {
 	}
 
 	return &YandexDateTime{
-		Year:             abs["year"],
+		Year:   abs["year"],
+		Month:  abs["month"],
+		Day:    abs["day"],
+		Hour:   abs["hour"],
+		Minute: abs["minute"],
+
 		YearIsRelative:   rel["year"],
-		Month:            abs["month"],
 		MonthIsRelative:  rel["month"],
-		Day:              abs["day"],
 		DayIsRelative:    rel["day"],
-		Hour:             abs["hour"],
 		HourIsRelative:   rel["hour"],
-		Minute:           abs["minute"],
 		MinuteIsRelative: rel["minute"],
 	}
 }

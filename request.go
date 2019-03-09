@@ -26,16 +26,18 @@ type RequestPayload struct {
 	Command           string             `json:"command"`
 	OriginalUtterance string             `json:"original_utterance"`
 	Type              RequestPayloadType `json:"type"`
-	Markup            struct {
-		DangerousContext bool `json:"dangerous_context"`
-	} `json:"markup"`
-	Payload interface{} `json:"payload,omitempty"`
-	NLU     RequestNLU  `json:"nlu"`
+	Markup            RequestMarkup      `json:"markup"`
+	Payload           interface{}        `json:"payload,omitempty"`
+	NLU               RequestNLU         `json:"nlu"`
+}
+
+type RequestMarkup struct {
+	DangerousContext bool `json:"dangerous_context"`
 }
 
 type RequestNLU struct {
-	Tokens   []string  `json:"tokens"`
-	Entities []*Entity `json:"entities"`
+	Tokens   []string `json:"tokens"`
+	Entities []Entity `json:"entities"`
 }
 
 type RequestSession struct {
