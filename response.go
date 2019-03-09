@@ -59,15 +59,15 @@ type ResponseCardFooter struct {
 
 type ResponseCardButton struct {
 	Text    string      `json:"text"`
-	URL     string      `json:"url"`
+	URL     string      `json:"url,omitempty"`
 	Payload interface{} `json:"payload,omitempty"`
 }
 
 type ResponseButton struct {
 	Title   string      `json:"title"`
 	Payload interface{} `json:"payload,omitempty"`
-	URL     string      `json:"url"`
-	Hide    bool        `json:"hide"`
+	URL     string      `json:"url,omitempty"`
+	Hide    bool        `json:"hide,omitempty"`
 }
 
 // ResponseSession contains response session.

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"strconv"
@@ -15,12 +16,12 @@ type Printf func(format string, a ...interface{})
 type Responder func(ctx context.Context, request *Request) (*ResponsePayload, error)
 
 type Handler struct {
-	r              Responder
-	Timeout        time.Duration
-	Errorf         Printf
-	Debugf         Printf
-	IndentResponse bool
-	StrictDecoder  bool
+	r             Responder
+	Timeout       time.Duration
+	Errorf        Printf
+	Debugf        Printf
+	Indent        bool
+	StrictDecoder bool
 }
 
 func NewHandler(r Responder) *Handler {
@@ -54,6 +55,23 @@ func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	defer cancel()
 
 	if h.Debugf != nil {
+		if h.Indent {
+			b, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				h.errorf("Failed to read request: %s.", err)
+				http.Error(rw, "Internal server error.", 500)
+				return
+			}
+
+			var body bytes.Buffer
+			if err = json.Indent(&body, b, "", "  "); err != nil {
+				h.errorf("Failed to indent request: %s.", err)
+				http.Error(rw, "Internal server error.", 500)
+				return
+			}
+			req.Body = ioutil.NopCloser(&body)
+		}
+
 		b, err := httputil.DumpRequest(req, true)
 		if err != nil {
 			h.errorf("Failed to dump request: %s.", err)
@@ -100,9 +118,9 @@ func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		Version: request.Version,
 	}
 
-	var buf bytes.Buffer
-	encoder := json.NewEncoder(&buf)
-	if h.IndentResponse {
+	var body bytes.Buffer
+	encoder := json.NewEncoder(&body)
+	if h.Indent {
 		encoder.SetIndent("", "  ")
 	}
 	if err := encoder.Encode(response); err != nil {
@@ -110,12 +128,12 @@ func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		http.Error(rw, "Internal server error.", 500)
 		return
 	}
-	h.debugf("Response:\n%s", buf.Bytes())
+	h.debugf("Response body:\n%s", body.Bytes())
 
 	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
-	rw.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
+	rw.Header().Set("Content-Length", strconv.Itoa(body.Len()))
 	rw.WriteHeader(200)
-	if _, err := rw.Write(buf.Bytes()); err != nil {
+	if _, err := rw.Write(body.Bytes()); err != nil {
 		h.errorf("Failed to write response body: %s.", err)
 	}
 }
