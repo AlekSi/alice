@@ -1,35 +1,58 @@
 package alice
 
-// https://tech.yandex.ru/dialogs/alice/doc/protocol-docpage/#response
+type ResponseCardType string
+
+const (
+	BigImage  ResponseCardType = "BigImage"
+	ItemsList ResponseCardType = "ItemsList"
+)
+
+// Response represents main response object.
+// See https://tech.yandex.ru/dialogs/alice/doc/protocol-docpage/#response
 type Response struct {
-	Version  string          `json:"version"`
 	Response ResponsePayload `json:"response"`
 	Session  ResponseSession `json:"session"`
+	Version  string          `json:"version"`
 }
 
+// ResponsePayload contains response payload.
 type ResponsePayload struct {
 	Text       string           `json:"text"`
-	Tts        string           `json:"tts"`
+	Tts        string           `json:"tts,omitempty"`
 	Card       *ResponseCard    `json:"card,omitempty"`
 	Buttons    []ResponseButton `json:"buttons,omitempty"`
 	EndSession bool             `json:"end_session"`
 }
 
+// ResponseCard contains response card.
 type ResponseCard struct {
-	Type   string `json:"type"`
-	Header struct {
-		Text string `json:"text"`
-	} `json:"header,omitempty"`
-	Items []struct {
-		ImageID     string             `json:"image_id"`
-		Title       string             `json:"title"`
-		Description string             `json:"description"`
-		Button      ResponseCardButton `json:"button,omitempty"`
-	} `json:"items,omitempty"`
-	Footer struct {
-		Text   string             `json:"text"`
-		Button ResponseCardButton `json:"button,omitempty"`
-	} `json:"footer,omitempty"`
+	Type ResponseCardType `json:"type"`
+
+	// single image
+
+	ResponseCardItem
+
+	// multiple images
+
+	Header *ResponseCardHeader `json:"header,omitempty"`
+	Items  []ResponseCardItem  `json:"items,omitempty"`
+	Footer *ResponseCardFooter `json:"footer,omitempty"`
+}
+
+type ResponseCardHeader struct {
+	Text string `json:"text"`
+}
+
+type ResponseCardItem struct {
+	ImageID     string              `json:"image_id,omitempty"`
+	Title       string              `json:"title,omitempty"`
+	Description string              `json:"description,omitempty"`
+	Button      *ResponseCardButton `json:"button,omitempty"`
+}
+
+type ResponseCardFooter struct {
+	Text   string              `json:"text"`
+	Button *ResponseCardButton `json:"button,omitempty"`
 }
 
 type ResponseCardButton struct {
@@ -45,12 +68,14 @@ type ResponseButton struct {
 	Hide    bool        `json:"hide"`
 }
 
+// ResponseSession contains response session.
 type ResponseSession struct {
 	SessionID string `json:"session_id"`
 	MessageID int    `json:"message_id"`
 	UserID    string `json:"user_id"`
 }
 
+// NewResponse creates new responses object and copies version and session from request.
 func NewResponse(req *Request) *Response {
 	return &Response{
 		Version: req.Version,
