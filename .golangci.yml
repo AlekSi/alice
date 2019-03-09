@@ -1,0 +1,14 @@
+---
+linters-settings:
+  goimports:
+    local-prefixes: github.com/AlekSi/alice
+
+  lll:
+    line-length: 110
+    tab-width: 4
+
+linters:
+  enable-all: true
+
+issues:
+  exclude-use-default: false
