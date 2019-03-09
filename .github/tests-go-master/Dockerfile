@@ -1,6 +1,6 @@
 FROM captncraig/go-tip
 
-LABEL "com.github.actions.name"="Run tests with Go master"
+LABEL "com.github.actions.name"="Test with Go master"
 LABEL "com.github.actions.icon"="radio"
 LABEL "com.github.actions.color"="red"
 
