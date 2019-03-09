@@ -1,12 +1,14 @@
 workflow "Main" {
-  on = "push"
-  resolves = ["Run tests with Go 1.12", "Run tests with Go master"]
+  on = "pull_request"
+  resolves = ["Test with Go 1.12", "Test with Go master"]
 }
 
-action "Run tests with Go 1.12" {
+action "Test with Go 1.12" {
   uses = "./.github/tests-go-1.12"
+  secrets = ["CODECOV_TOKEN"]
 }
 
-action "Run tests with Go master" {
+action "Test with Go master" {
   uses = "./.github/tests-go-master"
+  secrets = ["CODECOV_TOKEN"]
 }
