@@ -76,15 +76,3 @@ type ResponseSession struct {
 	MessageID int    `json:"message_id"`
 	UserID    string `json:"user_id"`
 }
-
-// NewResponse creates new responses object and copies version and session from request.
-func NewResponse(req *Request) *Response {
-	return &Response{
-		Version: req.Version,
-		Session: ResponseSession{
-			SessionID: req.Session.SessionID,
-			MessageID: req.Session.MessageID,
-			UserID:    req.Session.UserID,
-		},
-	}
-}

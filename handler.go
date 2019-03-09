@@ -1,10 +1,4 @@
-// Package alice provides helpers for developing skills for Alice virtual assistant
-// via Yandex.Dialogs platform.
-//
-// See https://alice.yandex.ru for general information about Alice.
-// See https://tech.yandex.ru/dialogs/alice/ for information about Yandex.Dialogs platform.
-// See https://tech.yandex.ru/dialogs/alice/doc/ for technical documentation.
-package alice // import "github.com/AlekSi/alice"
+package alice
 
 import (
 	"bytes"
@@ -18,13 +12,15 @@ import (
 
 type Printf func(format string, a ...interface{})
 
-type Responder func(ctx context.Context, request *Request, response *Response) error
+type Responder func(ctx context.Context, request *Request) (*ResponsePayload, error)
 
 type Handler struct {
-	r       Responder
-	Timeout time.Duration
-	Errorf  Printf
-	Debugf  Printf
+	r              Responder
+	Timeout        time.Duration
+	Errorf         Printf
+	Debugf         Printf
+	IndentResponse bool
+	StrictDecoder  bool
 }
 
 func NewHandler(r Responder) *Handler {
@@ -46,10 +42,11 @@ func (h *Handler) debugf(format string, a ...interface{}) {
 	}
 }
 
-func pingResponder(ctx context.Context, request *Request, response *Response) error {
-	response.Response.Text = "pong"
-	response.Response.EndSession = true
-	return nil
+func pingResponder(ctx context.Context, request *Request) (*ResponsePayload, error) {
+	return &ResponsePayload{
+		Text:       "pong",
+		EndSession: true,
+	}, nil
 }
 
 func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
@@ -68,7 +65,7 @@ func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	request := new(Request)
 	decoder := json.NewDecoder(req.Body)
-	if h.Debugf != nil {
+	if h.StrictDecoder {
 		decoder.DisallowUnknownFields()
 	}
 	if err := decoder.Decode(request); err != nil {
@@ -82,16 +79,30 @@ func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		r = pingResponder
 	}
 
-	response := NewResponse(request)
-	if err := r(ctx, request, response); err != nil {
+	payload, err := r(ctx, request)
+	if err != nil {
 		h.errorf("Responder failed: %s.", err)
 		http.Error(rw, "Internal server error.", 500)
 		return
 	}
+	if payload == nil {
+		h.errorf("Responder returned nil payload without error.")
+		http.Error(rw, "Internal server error.", 500)
+		return
+	}
+	response := &Response{
+		Response: *payload,
+		Session: ResponseSession{
+			SessionID: request.Session.SessionID,
+			MessageID: request.Session.MessageID,
+			UserID:    request.Session.UserID,
+		},
+		Version: request.Version,
+	}
 
 	var buf bytes.Buffer
 	encoder := json.NewEncoder(&buf)
-	if h.Debugf != nil {
+	if h.IndentResponse {
 		encoder.SetIndent("", "  ")
 	}
 	if err := encoder.Encode(response); err != nil {
