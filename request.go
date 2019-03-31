@@ -48,6 +48,7 @@ type RequestSession struct {
 	UserID    string `json:"user_id"`
 }
 
+// HasScreen returns true if user's device has screen.
 func (m RequestMeta) HasScreen() bool {
 	return m.Interfaces["screen"] != nil
 }

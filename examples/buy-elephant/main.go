@@ -1,5 +1,6 @@
 // +build ignore
 
+// Port of https://github.com/yandex/alice-skills/tree/master/python/buy-elephant
 package main
 
 import (
@@ -14,8 +15,6 @@ import (
 
 	"github.com/AlekSi/alice"
 )
-
-// Port of https://github.com/yandex/alice-skills/tree/master/python/buy-elephant
 
 //nolint:gochecknoglobals
 var (

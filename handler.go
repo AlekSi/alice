@@ -11,19 +11,35 @@ import (
 	"time"
 )
 
+// Printf is a log.Printf-like function that can be used for logging.
 type Printf func(format string, a ...interface{})
 
+// Responder is a function that should be implemented to handle Yandex.Dialogs requests.
+//
+// Passed context is derived from HTTP request's context with added handler's timeout.
+// It is canceled when the request is canceled (see https://golang.org/pkg/net/http/#Request.Context)
+// or on timeout.
+//
+// Only response payload can be returned; other response fields (session, version) will be set automatically.
+// If error is returned, it is logged with error logger, and 500 Internal server error is sent in response.
 type Responder func(ctx context.Context, request *Request) (*ResponsePayload, error)
 
+// Handler accepts Yandex.Dialogs requests, decodes them, handles "ping" requests itself,
+// and delegates other requests to responder.
 type Handler struct {
-	r             Responder
-	Timeout       time.Duration
-	Errorf        Printf
-	Debugf        Printf
-	Indent        bool
-	StrictDecoder bool
+	r Responder
+
+	Timeout time.Duration // responder's timeout
+	Errorf  Printf        // error logger
+
+	// debugging options
+	Debugf        Printf // debug logger
+	Indent        bool   // indent requests and responses
+	StrictDecoder bool   // disallow unexpected fields in requests
 }
 
+// NewHandler creates new handler with given responder and default timeout (3s).
+// Exported fields of the returned object can be changed before usage.
 func NewHandler(r Responder) *Handler {
 	return &Handler{
 		r:       r,
@@ -50,6 +66,11 @@ func pingResponder(ctx context.Context, request *Request) (*ResponsePayload, err
 	}, nil
 }
 
+func internalError(rw http.ResponseWriter) {
+	http.Error(rw, "Internal server error.", 500)
+}
+
+// ServeHTTP implements http.Handler interface.
 func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(req.Context(), h.Timeout)
 	defer cancel()
@@ -59,14 +80,14 @@ func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			b, err := ioutil.ReadAll(req.Body)
 			if err != nil {
 				h.errorf("Failed to read request: %s.", err)
-				http.Error(rw, "Internal server error.", 500)
+				internalError(rw)
 				return
 			}
 
 			var body bytes.Buffer
 			if err = json.Indent(&body, b, "", "  "); err != nil {
 				h.errorf("Failed to indent request: %s.", err)
-				http.Error(rw, "Internal server error.", 500)
+				internalError(rw)
 				return
 			}
 			req.Body = ioutil.NopCloser(&body)
@@ -75,7 +96,7 @@ func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		b, err := httputil.DumpRequest(req, true)
 		if err != nil {
 			h.errorf("Failed to dump request: %s.", err)
-			http.Error(rw, "Internal server error.", 500)
+			internalError(rw)
 			return
 		}
 		h.debugf("Request:\n%s", b)
@@ -100,12 +121,12 @@ func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	payload, err := r(ctx, request)
 	if err != nil {
 		h.errorf("Responder failed: %s.", err)
-		http.Error(rw, "Internal server error.", 500)
+		internalError(rw)
 		return
 	}
 	if payload == nil {
 		h.errorf("Responder returned nil payload without error.")
-		http.Error(rw, "Internal server error.", 500)
+		internalError(rw)
 		return
 	}
 	response := &Response{
@@ -125,7 +146,7 @@ func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 	if err := encoder.Encode(response); err != nil {
 		h.errorf("Failed to encode response body: %s.", err)
-		http.Error(rw, "Internal server error.", 500)
+		internalError(rw)
 		return
 	}
 	h.debugf("Response body:\n%s", body.Bytes())

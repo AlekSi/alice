@@ -5,23 +5,41 @@ import (
 	"strconv"
 )
 
+// EntityType represents entity type.
+type EntityType string
+
+// Entity types.
+const (
+	EntityYandexFio      EntityType = "YANDEX.FIO"
+	EntityYandexGeo      EntityType = "YANDEX.GEO"
+	EntityYandexDateTime EntityType = "YANDEX.DATETIME"
+	EntityYandexNumber   EntityType = "YANDEX.NUMBER"
+)
+
+// Entity represents NLU-extracted named entity.
+// See https://yandex.ru/dev/dialogs/alice/doc/nlu-docpage/.
 type Entity struct {
-	Tokens struct {
-		Start int `json:"start"`
-		End   int `json:"end"`
-	}
-	Type  string      `json:"type"`
-	Value interface{} `json:"value"`
+	Tokens EntityTokens `json:"tokens"`
+	Type   EntityType   `json:"type"`
+	Value  interface{}  `json:"value"`
 }
 
+// EntityTokens represents the place of extracted named entity in tokens slice.
+type EntityTokens struct {
+	Start int `json:"start"`
+	End   int `json:"end"`
+}
+
+// YandexFio represents extracted full name.
 type YandexFio struct {
 	FirstName      string
 	PatronymicName string
 	LastName       string
 }
 
+// YandexFio extracts full name from entity, or nil.
 func (e *Entity) YandexFio() *YandexFio {
-	if e.Type != "YANDEX.FIO" {
+	if e.Type != EntityYandexFio {
 		return nil
 	}
 	v, _ := e.Value.(map[string]interface{})
@@ -40,6 +58,7 @@ func (e *Entity) YandexFio() *YandexFio {
 	}
 }
 
+// YandexGeo represents extracted address.
 type YandexGeo struct {
 	Country     string
 	City        string
@@ -48,8 +67,9 @@ type YandexGeo struct {
 	Airport     string
 }
 
+// YandexGeo extracts address from entity, or nil.
 func (e *Entity) YandexGeo() *YandexGeo {
-	if e.Type != "YANDEX.GEO" {
+	if e.Type != EntityYandexGeo {
 		return nil
 	}
 	v, _ := e.Value.(map[string]interface{})
@@ -72,6 +92,7 @@ func (e *Entity) YandexGeo() *YandexGeo {
 	}
 }
 
+// YandexDateTime represents extracted date and/or time.
 type YandexDateTime struct {
 	Year   int
 	Month  int
@@ -86,8 +107,9 @@ type YandexDateTime struct {
 	MinuteIsRelative bool
 }
 
+// YandexDateTime extracts date and/or time from entity, or nil.
 func (e *Entity) YandexDateTime() *YandexDateTime {
-	if e.Type != "YANDEX.DATETIME" {
+	if e.Type != EntityYandexDateTime {
 		return nil
 	}
 	v, _ := e.Value.(map[string]interface{})
@@ -130,12 +152,14 @@ func (e *Entity) YandexDateTime() *YandexDateTime {
 	}
 }
 
+// YandexNumber represents extracted integer or float number.
 type YandexNumber struct {
 	json.Number
 }
 
+// YandexNumber extracts integer or float number from entity, or nil.
 func (e *Entity) YandexNumber() *YandexNumber {
-	if e.Type != "YANDEX.NUMBER" {
+	if e.Type != EntityYandexNumber {
 		return nil
 	}
 

@@ -106,24 +106,24 @@ func TestRequestDecode(t *testing.T) {
 	geo := req.Request.NLU.Entities[0]
 	assert.Equal(t, 2, geo.Tokens.Start)
 	assert.Equal(t, 6, geo.Tokens.End)
-	assert.Equal(t, "YANDEX.GEO", geo.Type)
+	assert.Equal(t, EntityYandexGeo, geo.Type)
 	assert.Equal(t, &YandexGeo{Street: "льва толстого", HouseNumber: "16"}, geo.YandexGeo())
 
 	fio := req.Request.NLU.Entities[1]
 	assert.Equal(t, 3, fio.Tokens.Start)
 	assert.Equal(t, 5, fio.Tokens.End)
-	assert.Equal(t, "YANDEX.FIO", fio.Type)
+	assert.Equal(t, EntityYandexFio, fio.Type)
 	assert.Equal(t, &YandexFio{FirstName: "лев", LastName: "толстой"}, fio.YandexFio())
 
 	num := req.Request.NLU.Entities[2]
 	assert.Equal(t, 5, num.Tokens.Start)
 	assert.Equal(t, 6, num.Tokens.End)
-	assert.Equal(t, "YANDEX.NUMBER", num.Type)
+	assert.Equal(t, EntityYandexNumber, num.Type)
 	assert.Equal(t, "16", num.YandexNumber().String())
 
 	dt := req.Request.NLU.Entities[3]
 	assert.Equal(t, 6, dt.Tokens.Start)
 	assert.Equal(t, 8, dt.Tokens.End)
-	assert.Equal(t, "YANDEX.DATETIME", dt.Type)
+	assert.Equal(t, EntityYandexDateTime, dt.Type)
 	assert.Equal(t, &YandexDateTime{Day: 1, DayIsRelative: true}, dt.YandexDateTime())
 }
