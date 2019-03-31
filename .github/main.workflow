@@ -1,29 +1,29 @@
 workflow "Push" {
   on = "push"
-  resolves = ["Push / Test with Go 1.12", "Push / Test with Go master"]
+  resolves = ["Push: test with Go 1.12", "Push: test with Go master"]
 }
 
 workflow "PR" {
   on = "pull_request"
-  resolves = ["PR / Test with Go 1.12", "PR / Test with Go master"]
+  resolves = ["PR: test with Go 1.12", "PR: test with Go master"]
 }
 
-action "Push / Test with Go 1.12" {
+action "Push: test with Go 1.12" {
   uses = "./.github/tests-go-1.12"
   secrets = ["CODECOV_TOKEN"]
 }
 
-action "Push / Test with Go master" {
+action "Push: test with Go master" {
   uses = "./.github/tests-go-master"
   secrets = ["CODECOV_TOKEN"]
 }
 
-action "PR / Test with Go 1.12" {
+action "PR: test with Go 1.12" {
   uses = "./.github/tests-go-1.12"
   secrets = ["CODECOV_TOKEN"]
 }
 
-action "PR / Test with Go master" {
+action "PR: test with Go master" {
   uses = "./.github/tests-go-master"
   secrets = ["CODECOV_TOKEN"]
 }
