@@ -7,5 +7,3 @@
 
 Package alice provides helpers for developing skills for Alice virtual assistant
 via Yandex.Dialogs platform.
-
-Work in progress! Do not use yet.
