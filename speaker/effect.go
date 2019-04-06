@@ -1,3 +1,4 @@
+// Package speaker provides various sounds and effects.
 package speaker
 
 import (
