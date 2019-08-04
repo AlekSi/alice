@@ -11,13 +11,14 @@ via Yandex.Dialogs platform.
 # Example
 
 ```go
-h := alice.NewHandler(func(ctx context.Context, request *alice.Request) (*alice.ResponsePayload, error) {
+responder := func(ctx context.Context, request *alice.Request) (*alice.ResponsePayload, error) {
     return &alice.ResponsePayload{
         Text:       "Bye!",
         EndSession: true,
     }, nil
-})
+}
 
+h := alice.NewHandler(responder)
 h.Errorf = log.Printf
 http.Handle("/", h)
 
