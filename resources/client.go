@@ -1,4 +1,4 @@
-package images
+package resources
 
 import (
 	"encoding/json"
@@ -7,8 +7,8 @@ import (
 )
 
 type Client struct {
-	OAuthToken string
 	SkillID    string
+	OAuthToken string
 	HTTPClient *http.Client
 }
 

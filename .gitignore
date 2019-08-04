@@ -2,4 +2,3 @@
 cover.out
 vendor/
 ngrok.yml
-.envrc
