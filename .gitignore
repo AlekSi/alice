@@ -1,4 +1,10 @@
-.envrc
 cover.out
 vendor/
+
+.envrc
 ngrok.yml
+
+*.mp3
+*.ogg
+*.opus
+*.wav
