@@ -33,4 +33,3 @@ jobs:
       run: curl -s https://codecov.io/bash | bash -s -- -t $CODECOV_TOKEN
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      if: {{ secrets.CODECOV_TOKEN != '' }}
