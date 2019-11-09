@@ -27,4 +27,9 @@ jobs:
       run: go install -v ./...
 
     - name: Test
-      run: go test -v ./...
+      run: go test -v -covermode=count ./...
+
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
