@@ -1,8 +1,6 @@
-cover.out
-vendor/
-
 .envrc
 ngrok.yml
+cover.out
 
 *.mp3
 *.ogg
