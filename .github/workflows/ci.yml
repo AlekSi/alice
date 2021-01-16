@@ -28,10 +28,10 @@ jobs:
     continue-on-error: ${{ matrix.may-fail }}
     runs-on: ${{ matrix.os }}
 
-    env:
-      GOCACHE: ~/go/cache/build
-      GOMODCACHE: ~/go/cache/mod
-      GOLANGCI_LINT_CACHE: ~/go/cache/lint
+    # env:
+    #   GOCACHE: ~/go/cache/build
+    #   GOMODCACHE: ~/go/cache/mod
+    #   GOLANGCI_LINT_CACHE: ~/go/cache/lint
 
     steps:
       - name: Set up Go release
