@@ -10,7 +10,7 @@ import (
 	_ "mvdan.cc/gofumpt/gofumports"
 )
 
-//go:generate go build -o ../bin/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
-//go:generate go build -o ../bin/go-consistent github.com/quasilyte/go-consistent
-//go:generate go build -o ../bin/reviewdog github.com/reviewdog/reviewdog/cmd/reviewdog
-//go:generate go build -o ../bin/gofumports mvdan.cc/gofumpt/gofumports
+//go:generate go build -v -o ../bin/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
+//go:generate go build -v -o ../bin/go-consistent github.com/quasilyte/go-consistent
+//go:generate go build -v -o ../bin/reviewdog github.com/reviewdog/reviewdog/cmd/reviewdog
+//go:generate go build -v -o ../bin/gofumports mvdan.cc/gofumpt/gofumports
