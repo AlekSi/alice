@@ -10,3 +10,7 @@ init:                                      ## Install development tools
 
 format:                                    ## Format source code
 	bin/gofumports -local github.com/AlekSi/alice -l -w .
+
+test:                                      ## Run tests
+	go install -v ./...
+	go test -v -coverprofile=cover.out -covermode=count ./...
