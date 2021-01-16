@@ -91,6 +91,8 @@ func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 				return
 			}
 			req.Body = ioutil.NopCloser(&body)
+			req.ContentLength = int64(body.Len())
+			req.TransferEncoding = nil
 		}
 
 		b, err := httputil.DumpRequest(req, true)
