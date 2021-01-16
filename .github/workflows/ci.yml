@@ -66,10 +66,8 @@ jobs:
 
       - name: Download modules
         run: |
-          go mod download
-          go mod verify
-          cd tools && go mod download
-          cd tools && go mod verify
+          go mod download && go mod verify
+          cd tools && go mod download && go mod verify
 
       - name: Install tools
         run: |
