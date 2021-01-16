@@ -57,9 +57,9 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - run: |
-          env
-          go env
+      - run: env
+
+      - run: go env
 
       - name: Enable Go cache
         uses: actions/cache@v2
