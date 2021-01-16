@@ -28,10 +28,10 @@ jobs:
     continue-on-error: ${{ matrix.may-fail }}
     runs-on: ${{ matrix.os }}
 
-    # env:
-    #   GOCACHE: ~/go/cache/build
-    #   GOMODCACHE: ~/go/cache/mod
-    #   GOLANGCI_LINT_CACHE: ~/go/cache/lint
+    env:
+      GOCACHE: /home/runner/go/cache/build
+      GOMODCACHE: /home/runner/go/cache/mod
+      GOLANGCI_LINT_CACHE: /home/runner/go/cache/lint
 
     steps:
       - name: Set up Go release
@@ -57,21 +57,27 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - run: env
-
-      - run: go env
-
       - name: Enable Go cache
         uses: actions/cache@v2
         with:
-          path: ~/go/cache
+          path: /home/runner/go/cache
           key: ${{ matrix.os }}-go-${{ matrix.go-version }}
+          restore-keys: ${{ matrix.os }}-go-${{ matrix.go-version }}
 
-      - name: Install
-        run: go install -v ./...
+      - name: Download modules
+        run: |
+          go mod download
+          go mod verify
+          cd tools && go mod download
+          cd tools && go mod verify
 
-      - name: Test
-        run: go test -v -coverprofile=cover.out -covermode=count ./...
+      - name: Install tools
+        run: |
+          pwd
+          make init
+
+      - name: Run tests
+        run: make test
 
       - name: Upload coverage report
         run: curl -s https://codecov.io/bash | bash -s -- -X fix
