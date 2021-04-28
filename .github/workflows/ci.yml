@@ -1,35 +1,86 @@
+---
 name: CI
-on: [push, pull_request]
+on:
+  schedule:
+    - cron: "0 12 * * 0"
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   test:
-    strategy:
-      matrix:
-        go: [1.15.x]
+    name: Test
+    timeout-minutes: 10
 
-    name: Test with Go ${{ matrix.go }}
-    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version:
+          - 1.15.x
+        os: [ubuntu-20.04]
+        may-fail: [false]
+        include:
+          - go-version: tip
+            os: ubuntu-20.04
+            may-fail: true
+
+    continue-on-error: ${{ matrix.may-fail }}
+    runs-on: ${{ matrix.os }}
+
+    env:
+      GOCACHE: /home/runner/go/cache/build
+      GOMODCACHE: /home/runner/go/cache/mod
+      GOLANGCI_LINT_CACHE: /home/runner/go/cache/lint
 
     steps:
-    - name: Set up Go ${{ matrix.go }}
-      uses: actions/setup-go@v1
-      with:
-        go-version: ${{ matrix.go }}
-      id: go
+      - name: Set up Go release
+        if: matrix.go-version != 'tip'
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
 
-    - name: Check out code
-      uses: actions/checkout@v1
+      - name: Set up Go tip
+        if: matrix.go-version == 'tip'
+        run: |
+          git clone --depth=1 https://go.googlesource.com/go $HOME/gotip
+          cd $HOME/gotip/src
+          ./make.bash
+          echo "GOROOT=$HOME/gotip" >> $GITHUB_ENV
+          echo "$HOME/gotip/bin" >> $GITHUB_PATH
 
-    - name: Download dependencies
-      run: go get -t ./...
+      - name: Set GO_VERSION environment variable
+        run: |
+          which -a go
+          go version
+          echo "GO_VERSION=$(go version)" >> $GITHUB_ENV
+          echo "TIMESTAMP=$(data)" >> $GITHUB_ENV
 
-    - name: Install
-      run: go install -v ./...
+      - name: Check out code
+        uses: actions/checkout@v2
 
-    - name: Test
-      run: go test -v -coverprofile=cover.out -covermode=count ./...
+      - name: Enable Go cache
+        uses: actions/cache@v2
+        with:
+          path: /home/runner/go/cache
+          key: ${{ matrix.os }}-${{ env.GO_VERSION }}-${{ env.TIMESTAMP }}
+          restore-keys: |
+            ${{ matrix.os }}-${{ env.GO_VERSION }}-${{ env.TIMESTAMP }}
 
-    - name: Upload coverage report
-      run: curl -s https://codecov.io/bash | bash -s -- -X fix
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Download modules
+        run: |
+          go mod download && go mod verify
+          cd tools && go mod download && go mod verify
+
+      - name: Install tools
+        run: |
+          pwd
+          make init
+
+      - name: Run tests
+        run: make test
+
+      - name: Upload coverage report
+        run: curl -s https://codecov.io/bash | bash -s -- -X fix
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
