@@ -51,8 +51,10 @@ jobs:
 
       - name: Set GO_VERSION environment variable
         run: |
+          which -a go
           go version
           echo "GO_VERSION=$(go version)" >> $GITHUB_ENV
+          echo "TIMESTAMP=$(data)" >> $GITHUB_ENV
 
       - name: Check out code
         uses: actions/checkout@v2
@@ -61,8 +63,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /home/runner/go/cache
-          key: ${{ matrix.os }}-go-${{ matrix.go-version }}
-          restore-keys: ${{ matrix.os }}-go-${{ matrix.go-version }}
+          key: ${{ matrix.os }}-${{ env.GO_VERSION }}-${{ env.TIMESTAMP }}
+          restore-keys: |
+            ${{ matrix.os }}-${{ env.GO_VERSION }}-${{ env.TIMESTAMP }}
 
       - name: Download modules
         run: |
