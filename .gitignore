@@ -1,3 +1,8 @@
 .envrc
-cover.out
 ngrok.yml
+cover.out
+
+*.mp3
+*.ogg
+*.opus
+*.wav
